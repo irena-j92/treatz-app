@@ -1,0 +1,57 @@
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Check, Delete, GitFork, Search, Send, Users, Zap } from 'lucide-react';
+import { Art, PageHeader, ProgressFill, StatusPill } from './components';
+import { useAccount, type Receipt } from './account';
+import { editAmount, formatMoney, parseTransferAmount, splitCents, validDraft } from './money.mjs';
+import { getTransaction } from './transactions';
+
+export const friends = [
+  { id:'mia', name:'Mia', handle:'@mia_moves', art:'avatar-mia' },
+  { id:'leo', name:'Leo', handle:'@leo_on_a_roll', art:'avatar-leo' },
+  { id:'ava', name:'Ava', handle:'@ava_tastic07', art:'avatar-ava' },
+  { id:'noah', name:'Noah', handle:'@noah_saves', art:'avatar-noah' },
+  { id:'tina', name:'Tina', handle:'@tina_treats', art:'avatar-tina' },
+  { id:'sam', name:'Sam', handle:'@sam_sweet', art:'avatar-sam' },
+];
+export function getFriend(id: string) { return friends.find(friend => friend.id === id) || friends[2]; }
+
+export function RewardsScreen({ back, collection, cashback, deals }: { back: () => void; collection: () => void; cashback: () => void; deals: () => void }) {
+  const { account } = useAccount();
+  return <div className="screen-content rewards-content"><header className="reward-hero"><PageHeader title="Reward Status" back={back} /><section className="reward-level"><button className="row-open" onClick={collection} aria-label="Open current level collection" /><div className="reward-level-number"><span>LEVEL</span><strong>24</strong></div><div className="reward-level-copy"><p>720 / 1000 XP</p><div className="reward-level-track" role="progressbar" aria-label="Level 24 progress" aria-valuemin={0} aria-valuemax={1000} aria-valuenow={720}><ProgressFill width="111px" color="#005F34" /></div><small>280 XP to Level 25</small></div><Art name="custard" /></section></header><div className="rewards-body"><h2>Active boosts</h2><div className="boost-card starbucks-boost"><span className="boost-logo"><Art name="brand-starbucks" alt="Starbucks" /></span><div><h3>2x Starbucks<br />cashback</h3><p>10% base → 20% total</p></div></div><div className="boost-card nike-boost"><span className="boost-logo"><Art name="brand-nike" alt="Nike" /></span><div><h3>2x Nike cashback</h3><p>10% base → 20% total</p></div></div><button className="balance-card rewards-balance" onClick={cashback} aria-label="Open cashback balance"><Art name="coin-stack" /><span className="balance-card-copy"><strong>{formatMoney(account.balanceCents)}</strong><StatusPill /></span></button><h2 className="recommended-heading">Recommended deals</h2><div className="recommended-deals"><button onClick={deals}><Art name="brand-nike" /><strong>Earn up to 15%</strong><span>Nike</span></button><button onClick={deals}><Art name="brand-smeg" /><strong>Earn up to 5%</strong><span>SMEG</span></button></div></div></div>;
+}
+
+export function BillScreen({ billId, back, split }: { billId: string; back: () => void; split: () => void }) {
+  const bill = getTransaction(billId);
+  return <div className="screen-content bill-content"><header className="bill-hero"><PageHeader title="Bill Overview" back={back} /><span className="bill-merchant-logo"><Art name={`brand-${bill.logo}`} alt={`${bill.name} logo`} /></span><h2>{bill.name}</h2><strong className="bill-total">{formatMoney(bill.purchaseCents)}</strong><p><span>Completed</span> • {bill.date}, 12:45 PM</p></header><div className="bill-body"><div className="bill-summary-cards"><div><span>Category</span><strong><i />{bill.category}</strong></div><div><span>Points Earned</span><strong><Zap size={18} />+{bill.points} pts</strong></div></div><dl className="bill-details"><div><dt>Payment Method</dt><dd>MoniMax Card •• 4242</dd></div><div><dt>Merchant ID</dt><dd>{bill.id.slice(0,2).toUpperCase()}–9921–X</dd></div><div><dt>Merchant<br />Address</dt><dd title="123 Market St, San Francisco">123 Market St, San Fran...</dd></div></dl><button className="pink-button split-bill-button" onClick={split}><GitFork size={19} />Split Bill</button></div></div>;
+}
+
+export function SplitScreen({ billId, back, transfer }: { billId: string; back: () => void; transfer: (recipientId: string) => void }) {
+  const [query, setQuery] = useState(''), [selected, setSelected] = useState('ava');
+  const shares = splitCents(getTransaction(billId).purchaseCents,5);
+  const splitters = friends.slice(0,5).filter(friend => friend.name.toLowerCase().includes(query.toLowerCase()));
+  return <div className="screen-content splitter-content"><header className="splitter-hero"><PageHeader title="Bill Splitter" back={back} /><label className="friend-search"><Search size={21} strokeWidth={1.5} /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search friends or contacts..." aria-label="Search friends or contacts" /></label><h2>Recent</h2><div className="recent-friends">{['leo','ava','sam'].map(id => { const friend = getFriend(id); return <button key={id} className="friend-avatar" onClick={() => transfer(id)} aria-label={`Send money to ${friend.name}`}><Art name={friend.art} /></button>; })}</div></header><section className="splitter-list"><h2>Splitters</h2>{splitters.map(friend => <div className={`splitter-row ${selected === friend.id ? 'selected' : ''}`} key={friend.id}><button className={`friend-avatar ${['leo','ava'].includes(friend.id) ? 'rimmed' : ''}`} onClick={() => transfer(friend.id)} aria-label={`Send money to ${friend.name}`}><Art name={friend.art} /></button><button className="splitter-name" onClick={() => setSelected(friend.id)} aria-pressed={selected === friend.id}>{friend.name}</button><strong>{formatMoney(shares[friends.indexOf(friend)])}</strong></div>)}{!splitters.length && <p className="no-friends">No friends found.</p>}</section><button className="pink-button splitter-continue" onClick={() => transfer(selected)}>Continue</button></div>;
+}
+
+export function TransferScreen({ recipientId, back, submit }: { recipientId: string; back: () => void; submit: (amountCents: number) => void }) {
+  const { account } = useAccount(), friend = getFriend(recipientId);
+  const [draft,setDraft] = useState(''), [submitting,setSubmitting] = useState(false), [focused,setFocused] = useState(true);
+  const input = useRef<HTMLInputElement>(null), sending = useRef(false);
+  const amount = parseTransferAmount(draft) ?? 0, remaining = account.balanceCents - amount, overdrawn = remaining < 0;
+  useEffect(() => { input.current?.focus({ preventScroll:true }); },[]);
+  const send = () => { if(sending.current || amount <= 0 || overdrawn) return; sending.current = true; setSubmitting(true); submit(amount); };
+  return <div className="screen-content transfer-content"><header className="transfer-hero"><button className="transfer-back back-button" onClick={back} aria-label="Go back"><ArrowLeft size={20} /></button><div className="transfer-available"><Art name="coin" /><span>{formatMoney(account.balanceCents)}</span></div><div className="friend-avatar transfer-avatar"><Art name={friend.art} /></div><h1>Sending to {friend.name}</h1><p>{friend.handle}</p></header><form className="transfer-form" onSubmit={event => { event.preventDefault(); send(); }}><label className={`amount-entry ${focused ? 'focused' : ''}`}><span className={`amount-display ${formatMoney(amount).length > 9 ? 'small-amount' : ''}`} aria-hidden="true">{formatMoney(amount)}<i /></span><input ref={input} type="text" inputMode="none" autoComplete="off" spellCheck={false} value={draft} aria-label="Transfer amount in euros" aria-invalid={overdrawn} aria-describedby="remaining-cashback transfer-error" onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} onChange={event => { const next = event.target.value.replace(',','.'); if(validDraft(next)) setDraft(next); }} /></label><div className="paying-with"><span>Paying with</span><span>Cashback</span></div><div className="amount-keypad" aria-label="Amount keypad">{['1','2','3','4','5','6','7','8','9','.','0','delete'].map(key => <button type="button" key={key} aria-label={key === 'delete' ? 'Delete last digit' : key === '.' ? 'Decimal point' : key} onPointerDown={event => event.preventDefault()} onClick={() => { setDraft(current => editAmount(current,key)); input.current?.focus({ preventScroll:true }); }}>{key === 'delete' ? <Delete size={24} /> : key}</button>)}</div><div className={`remaining-balance ${overdrawn ? 'overdrawn' : ''}`} id="remaining-cashback" aria-live="polite"><span>Remaining Cashback</span><strong>{formatMoney(remaining)}</strong></div><p className="transfer-error" id="transfer-error" role={overdrawn ? 'alert' : undefined}>{overdrawn ? 'Amount exceeds your available cashback.' : ''}</p><button type="submit" className="pink-button transfer-submit" disabled={!amount || overdrawn || submitting}>{submitting ? 'Transferring…' : amount ? `Transfer ${formatMoney(amount)}` : 'Transfer'}</button></form></div>;
+}
+
+export function SuccessScreen({ receipt, home }: { receipt: Receipt | null; home: () => void }) {
+  const [status,setStatus] = useState('');
+  if(!receipt) return <div className="screen-content success-content light-header"><PageHeader title="Receipt" back={home} /><p className="empty-receipt">Make a transfer to see your receipt.</p><button className="white-receipt-button" onClick={home}>Back to Home</button></div>;
+  const friend = getFriend(receipt.recipientId), bill = getTransaction(receipt.billId), transactionId = `TXN–${receipt.id.slice(0,8).toUpperCase()}`;
+  const share = async () => {
+    const text = `Treatz receipt\nAmount: ${formatMoney(receipt.amountCents)}\nRecipient: ${friend.name}\nType: Split Bill (${bill.name})\nTransaction ID: ${transactionId}\nDate: ${new Date(receipt.createdAt).toLocaleString()}\n`;
+    try {
+      if(navigator.share) { await navigator.share({ title:'Treatz receipt',text }); setStatus('Receipt shared.'); }
+      else { const url = URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'})); const link = document.createElement('a'); link.href = url; link.download = `treatz-receipt-${receipt.id.slice(0,8)}.txt`; link.click(); setTimeout(() => URL.revokeObjectURL(url),1000); setStatus('Receipt downloaded.'); }
+    } catch(error) { if(!(error instanceof DOMException && error.name === 'AbortError')) setStatus('Receipt could not be shared. Please try again.'); }
+  };
+  return <div className="screen-content success-content light-header"><button className="success-back back-button" onClick={home} aria-label="Back to Home"><ArrowLeft size={20} /></button><div className="success-mark"><Check size={42} strokeWidth={2.5} /></div><h1>Success!</h1><p className="success-subtitle">Your transaction has been processed<br />instantly.</p><dl className="success-details"><div><dt>Amount</dt><dd className="receipt-amount">{formatMoney(receipt.amountCents)}</dd></div><div><dt>Recipient</dt><dd>{friend.name}</dd></div><div><dt>Type</dt><dd>Split Bill ({bill.name})</dd></div><div><dt>Transaction ID</dt><dd>{transactionId}</dd></div></dl><div className="split-pending"><span><Users size={25} /></span><div><strong>Split with 4 others</strong><p>Pending confirmations</p></div></div><button className="white-receipt-button back-home-button" onClick={home}>Back to Home</button><button className="white-receipt-button share-receipt-button" onClick={share}><Send size={18} fill="currentColor" />Share Receipt</button><p className="receipt-share-status" role="status">{status}</p></div>;
+}

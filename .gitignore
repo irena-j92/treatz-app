@@ -1,0 +1,5 @@
+node_modules
+dist
+*.tsbuildinfo
+.openai/local*
+.openai/qa*
