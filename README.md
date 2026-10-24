@@ -12,6 +12,18 @@ node scripts/check-render.mjs
 npm run build
 ```
 
+## 24 October visual update
+
+The eight new SVG exports update the splash, Dashboard, Profile, Cashback, Challenges, Leaderboard, deals browsing page (titled Rewards), and Merchant Search. Green gradient headers, native status bars, the new splash logo, three illustrated challenges, the reordered Profile, and a horizontal Active boosts carousel match the exports. Only isolated artwork/photos are reused. The generated achievement concept is not included.
+
+The new coherent starting cashback is €66.12, with €133.11 received and €66.99 redeemed. This resolves conflicting amounts in the source exports. Session state uses v2 for this baseline. The expiry reads 15 Oct 2027. Dashboard retains its transaction list below the three challenges. The existing Rewards navigation still opens Reward Status first; Deals opens the refreshed browsing page.
+
+## Latest six-screen revision
+
+The latest Splash, Wheel Of Fortune, Cashback, Challenges, Rewards browsing, and Collection SVGs replace their earlier versions. These clean exports omit the device status strip and square off the canvas. The wheel has rocket boosts and a FAIL sector while retaining its X, five-turn spin, and automatic dismissal. Collection now shows six new pastries and the Pastry/Cake/Bite-sized/Mystery filters, with the tile counts and counters from the reference. Active boost chips use the provided miniature rocket.
+
+The original logo pop, splash dissolve, game-style wheel bounce, pointer ticks, progress fills and sheet rise are retained. New screen cards and Collection tiles use short staggered overshoot-and-settle entrances, with reduced-motion alternatives.
+
 ## Routes and interactions
 
 - Root URL: splash fades/pops, dissolves, Home appears, then the wheel popup bounces in. Spin Now turns the wheel five times and dismisses it; no reward screen is invented. The wheel appears only in this initial-load flow. No button reopens it. The X button or Escape dismisses it, including during a spin.
@@ -36,4 +48,8 @@ Keyboard-accessible buttons, visible focus rings, descriptive labels, inert back
 
 ## Validation
 
-TypeScript/production build; route/spin/viewport and exact-cent financial state tests; server-rendered screens and navigation; transaction/bill/Rewards/Deals callback wiring; matching Home/Cashback history; zero transfer state and actual receipt data; initially hidden merchant sheet; five transaction logos; asset encoding and availability. Live interactive browser/screenshot QA is unavailable in this managed environment. Prior versions remain in Git history.
+TypeScript/production build; route/spin/viewport and exact-cent financial state tests; server-rendered screens and navigation; transaction/bill/Rewards/Deals callback wiring; matching Home/Cashback history; zero transfer state and actual receipt data; initially hidden merchant sheet; five transaction logos; asset encoding and availability. Live interactive browser QA is available for the October 24 update; Dashboard, Profile, Cashback, Challenges, Leaderboard, deals/boost scrolling, Merchant Search, splash/wheel, and the transfer journey are checked against the exports. Prior versions remain in Git history.
+
+Dashboard and Leaderboard now follow the paired SVG revision: each01 crop is placed above02 in one continuous native scrolling screen. The Dashboard stats showXP,Level24,12boosts andrank14; existing routes and shared transactions remain. The Leaderboard retains scope filters and current-user profile access. Both screens omit the device status strip and preserve bouncy entrances, with opacity-only reduced motion.
+
+Merchant and Profile also follow their paired SVG exports: Merchant01+02 compose the852px map/sheet view; Profile01+02 form1164px of scrolling content. The merchant sheet includes the original rocket and coin perk artwork, fractional4.2-star rating, directions, bookmark, boost and activation controls. Profile typography, metric cards, badges and achievements match the latest crops. These screens omit the device status strip and preserve bounce/progress/sheet motion with reduced-motion support. Cashback remains one shared account balance across screens.

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Art, Navigation, ProgressReady, type Screen } from './components';
+import { Art, DeviceStatusBar, Navigation, ProgressReady, type Screen } from './components';
 import { CashbackScreen, HomeScreen, ProfileScreen } from './screens';
 import { ChallengesScreen, CollectionScreen, DealsScreen, LeaderboardScreen } from './RewardScreens';
 import MapScreen from './MapScreen';
 import { BillScreen, RewardsScreen, SplitScreen, SuccessScreen, TransferScreen } from './FinanceScreens';
 import { useAccount } from './account';
+import { newReceiptId } from './money.mjs';
 import WheelPopup from './WheelPopup';
 import { deviceScale, INTRO, readScreen } from './flow.mjs';
 
@@ -28,7 +29,7 @@ export default function App() {
   const submitTransfer = (amountCents: number) => {
     if(transferLock.current || !Number.isSafeInteger(amountCents) || amountCents <= 0 || amountCents > account.balanceCents) return;
     transferLock.current = true;
-    dispatch({ type:'transfer',id:crypto.randomUUID(),amountCents,recipientId,billId,createdAt:new Date().toISOString() });
+    dispatch({ type:'transfer',id:newReceiptId(),amountCents,recipientId,billId,createdAt:new Date().toISOString() });
     go('success');
   };
   useEffect(() => { if (screen === 'transfer') transferLock.current = false; }, [screen]);
@@ -52,12 +53,13 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [intro, screen]);
   return <div className="desktop-stage min-h-dvh flex items-center justify-center"><div className="device-slot" style={{ width: 393 * scale, height: 852 * scale }}><div className="device" style={{ transform: `scale(${scale})` }}>
+    {intro === 'done' && !wheelOpen && !['home','profile','leaderboard','nearby','cashback','challenges','deals','collection'].includes(screen) && <DeviceStatusBar light={['rewards','bill','split','transfer'].includes(screen)} />}
     <ProgressReady value={intro === 'done' && !wheelOpen && (screen !== 'home' || !initialPopup.current)}><div className="app-shell flex h-full flex-col" inert={intro !== 'done' || wheelOpen}>
       <main className="app-main flex-1 min-h-0" ref={main} tabIndex={-1} id="main-content"><div className="screen-scroll h-full" ref={scroll} key={screen}>
         {screen === 'home' ? <HomeScreen profile={() => go('profile')} cashback={() => go('cashback')} collection={() => go('collection')} leaderboard={() => go('leaderboard')} challenges={() => go('challenges')} onTransaction={openBill} /> : screen === 'profile' ? <ProfileScreen back={back} cashback={() => go('cashback')} collection={() => go('collection')} leaderboard={() => go('leaderboard')} /> : screen === 'cashback' ? <CashbackScreen back={back} onTransaction={openBill} /> : screen === 'collection' ? <CollectionScreen back={back} cashback={() => go('cashback')} /> : screen === 'leaderboard' ? <LeaderboardScreen back={back} profile={() => go('profile')} /> : screen === 'challenges' ? <ChallengesScreen back={back} /> : screen === 'deals' ? <DealsScreen back={back} cashback={() => go('cashback')} map={() => go('nearby')} rewards={() => go('rewards')} /> : screen === 'rewards' ? <RewardsScreen back={back} collection={() => go('collection')} cashback={() => go('cashback')} deals={() => go('deals')} /> : screen === 'bill' ? <BillScreen billId={billId} back={back} split={() => go('split')} /> : screen === 'split' ? <SplitScreen billId={billId} back={back} transfer={startTransfer} /> : screen === 'transfer' ? <TransferScreen recipientId={recipientId} back={back} submit={submitTransfer} /> : screen === 'success' ? <SuccessScreen receipt={account.receipts.at(-1) || null} home={() => go('home')} /> : <MapScreen back={back} />}
       </div></main>{!['nearby','split','transfer','success'].includes(screen) && <Navigation screen={screen} go={go} />}
     </div></ProgressReady>
-    {intro !== 'done' && <div className={`splash-screen ${intro}`} role="status" aria-label="Welcome to Treatz"><Art name="logo" className="splash-logo" alt="treatz" /></div>}
+    {intro !== 'done' && <div className={`splash-screen ${intro}`} role="status" aria-label="Welcome to Treatz"><Art name="logo-updated" className="splash-logo" alt="treatz" /></div>}
     {wheelOpen && <WheelPopup close={closeWheel} reducedMotion={reducedMotion} />}
   </div></div></div>;
 }

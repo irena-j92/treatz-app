@@ -1,11 +1,11 @@
-import { Tag } from 'lucide-react';
+import { BatteryFull, Plane, Tag, Wifi } from 'lucide-react';
 import { useAccount } from './account';
 import { formatMoney } from './money.mjs';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, Clock3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Clock3 } from 'lucide-react';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 export const ProgressReady = createContext(true);
-export function ProgressFill({ width, color = '#FF8EFB', className = '' }: { width: string; color?: string; className?: string }) {
+export function ProgressFill({ width, color = 'var(--pink-progress)', className = '' }: { width: string; color?: string; className?: string }) {
   const ready = useContext(ProgressReady), ref = useRef<HTMLSpanElement>(null);
   const [filled, setFilled] = useState(false);
   useEffect(() => {
@@ -16,16 +16,16 @@ export function ProgressFill({ width, color = '#FF8EFB', className = '' }: { wid
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, [ready, filled]);
-  return <span ref={ref} className={`progress-fill ${className}`} data-target-width={width} style={{ width: filled ? width : '2px', backgroundColor: color }} />;
+  return <span ref={ref} className={`progress-fill ${className}`} data-target-width={width} style={{ width: filled ? width : '2px', background: color }} />;
 }
 
 export function Art({ name, className = '', alt = '', ...props }: { name: string; className?: string; alt?: string; width?: number; height?: number }) {
   return <img src={`/art/${name}.svg`} className={`art ${className}`} alt={alt} draggable={false} {...props} />;
 }
 
-export function PageHeader({ title, back, balance }: { title: string; back: () => void; balance?: () => void }) {
+export function PageHeader({ title, back, balance, chevron = false }: { title: string; back: () => void; balance?: () => void; chevron?: boolean }) {
   const { account } = useAccount();
-  return <header className="page-header"><button className="back-button" onClick={back} aria-label="Go back"><ArrowLeft size={20} strokeWidth={2} /></button><h1>{title}</h1>{balance && <button className="header-balance" onClick={balance} aria-label="Open cashback balance"><Art name="coin" />{formatMoney(account.balanceCents)}</button>}</header>;
+  return <header className="page-header"><button className="back-button" onClick={back} aria-label="Go back">{chevron ? <ChevronLeft size={20} strokeWidth={2.5} /> : <ArrowLeft size={20} strokeWidth={2} />}</button><h1>{title}</h1>{balance && <button className="header-balance" onClick={balance} aria-label="Open cashback balance"><Art name="coin" />{formatMoney(account.balanceCents)}</button>}</header>;
 }
 
 export function CharityBanner() {
@@ -52,4 +52,8 @@ export function Navigation({ screen, go }: { screen: Screen; go: (s: Screen) => 
     { label: 'Rewards', icon: 'rewards', onClick: () => go('rewards'), active: ['rewards','collection'].includes(screen) },
     { label: 'Deals', icon: 'deals', onClick: () => go('deals'), active: ['deals','nearby'].includes(screen) },
   ].map(item => <button key={item.label} onClick={item.onClick} disabled={item.disabled} aria-current={item.active ? 'page' : undefined} title={item.disabled ? `${item.label} — coming in a later screen` : item.label} className={item.active ? 'active' : ''}>{item.icon === 'deals' ? <Tag className="nav-icon deals-nav-icon" size={24} strokeWidth={1.6} /> : <span className="nav-icon" style={{ maskImage: `url(/art/nav-${item.icon}.svg)`, WebkitMaskImage: `url(/art/nav-${item.icon}.svg)` }} />}<span>{item.label}</span></button>)}</nav>;
+}
+
+export function DeviceStatusBar({ light = false }: { light?: boolean }) {
+  return <div className={`device-status ${light ? 'light-status' : ''}`} aria-hidden="true"><span>10:56</span><span className="status-symbols"><Wifi size={14} strokeWidth={2.5} /><Plane size={13} fill="currentColor" /><BatteryFull size={20} strokeWidth={1.6} /></span></div>;
 }

@@ -1,6 +1,6 @@
-export const INITIAL_CASHBACK = 2480;
-export const TOTAL_RECEIVED = 12480;
-export const initialAccount = { balanceCents: INITIAL_CASHBACK, redeemedCents: 10000, receipts: [] };
+export const INITIAL_CASHBACK = 6612;
+export const TOTAL_RECEIVED = 13311;
+export const initialAccount = { balanceCents: INITIAL_CASHBACK, redeemedCents: 6699, receipts: [] };
 
 export function validDraft(value) {
   return typeof value === 'string' && /^\d{0,7}(?:\.\d{0,2})?$/.test(value);
@@ -50,4 +50,9 @@ export function validateAccount(value) {
     replay = next;
   }
   return replay.balanceCents === value.balanceCents && replay.redeemedCents === value.redeemedCents ? replay : initialAccount;
+}
+
+export function newReceiptId(cryptoApi = globalThis.crypto) {
+  if (typeof cryptoApi.randomUUID === 'function') return cryptoApi.randomUUID();
+  return Array.from(cryptoApi.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
 }

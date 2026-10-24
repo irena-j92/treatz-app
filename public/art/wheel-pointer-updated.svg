@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="166 234 60 76" width="60" height="76" fill="none"><defs><filter id="filter5_d_1902_2827" x="166.299" y="233.742" width="57.3156" height="77.4414" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4.17178"/>
+<feGaussianBlur stdDeviation="5.21472"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1902_2827"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1902_2827" result="shape"/>
+</filter>
+<filter id="filter6_i_1902_2827" x="186.614" y="248.343" width="16.6871" height="20.3953" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="3.70825"/>
+<feGaussianBlur stdDeviation="1.85412"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.760031 0 0 0 0 0.0272489 0 0 0 0 0.520468 0 0 0 1 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_1902_2827"/>
+</filter>
+<linearGradient id="paint17_linear_1902_2827" x1="194.957" y1="219.141" x2="194.957" y2="302.577" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF74F2"/>
+<stop offset="1" stop-color="#E736AD"/>
+</linearGradient>
+<linearGradient id="paint18_linear_1902_2827" x1="194.957" y1="248.343" x2="194.957" y2="265.03" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF64FA"/>
+<stop offset="1" stop-color="#FF96E1"/>
+</linearGradient>
+</defs><g filter="url(#filter5_d_1902_2827)">
+<path d="M198.761 294.123C197.286 297.402 192.629 297.402 191.153 294.123L178.353 265.679C172.931 253.631 181.745 240 194.957 240C208.169 240 216.983 253.631 211.561 265.679L198.761 294.123Z" fill="url(#paint17_linear_1902_2827)"/>
+</g>
+<g filter="url(#filter6_i_1902_2827)">
+<circle cx="194.957" cy="256.687" r="8.34356" fill="#D843A7"/>
+</g>
+<circle cx="194.957" cy="256.687" r="7.92272" stroke="url(#paint18_linear_1902_2827)" stroke-width="0.841675"/>
+</svg>

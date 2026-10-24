@@ -9,7 +9,7 @@ const result = await build({ stdin: { contents: `
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { HomeScreen, ProfileScreen, CashbackScreen } from './src/screens';
-import { Navigation } from './src/components';
+import { Art, DeviceStatusBar, Navigation } from './src/components';
 import { ChallengesScreen, CollectionScreen, DealsScreen, LeaderboardScreen } from './src/RewardScreens';
 import MapScreen, { Rating } from './src/MapScreen';
 import WheelPopup from './src/WheelPopup';
@@ -17,6 +17,8 @@ import { TransactionsSection, transactions } from './src/transactions';
 import { BillScreen, RewardsScreen, SplitScreen, SuccessScreen, TransferScreen } from './src/FinanceScreens';
 const noop = () => {};
 export const views = {
+splash: renderToStaticMarkup(<Art name="logo-updated" alt="treatz" />),
+status: renderToStaticMarkup(<DeviceStatusBar />),
 home: renderToStaticMarkup(<HomeScreen profile={noop} cashback={noop} collection={noop} leaderboard={noop} challenges={noop} onTransaction={noop} />),
 profile: renderToStaticMarkup(<ProfileScreen back={noop} cashback={noop} collection={noop} leaderboard={noop} />),
 cashback: renderToStaticMarkup(<CashbackScreen back={noop} onTransaction={noop} />),
@@ -54,9 +56,18 @@ try {
   assert.deepEqual(checkWiring(), ['starbucks','nike','gap','hm','ikea','split','rewards','deals']);
   assert.match(views.home, /Welcome back/);
   assert.match(views.home, /Streak Goal/);
-  assert.match(views.profile, /Your Profile/);
+  assert.match(views.profile, /Profile/);
   assert.match(views.profile, /Student ID/);
-  assert.match(views.cashback, /Recent transactions/);
+  assert.match(views.cashback, /Transactions/);
+  assert.match(views.cashback,/Expires:/);
+  assert.match(views.cashback,/2027-10-15/);
+  assert.match(views.cashback,/€66.12/);
+  assert.match(views.cashback,/€133.11/);
+  assert.match(views.cashback,/€66.99/);
+  assert.match(views.home,/Daily streak/);
+  assert.match(views.home,/Piggy bank/);
+  assert.match(views.deals,/boost-carousel/);
+  assert.match(views.deals,/Urban Outfitters/);
   const history = markup => markup.match(/<section class="transactions">[\s\S]*?<\/section>/)?.[0];
   assert.ok(history(views.home));
   assert.equal(history(views.home),history(views.cashback));
@@ -74,7 +85,15 @@ try {
   assert.match(views.success,/Split Bill \(Nike\)/);
   assert.match(views.wheel, /role="dialog"/);
   assert.match(views.wheel, /Spin Now/);
-  assert.match(views.collection, /23 \/ 50 collected/);
+  assert.match(views.wheel,/wheel-updated.svg/);
+  assert.match(views.wheel,/rocket boosts and a FAIL sector/);
+  assert.match(views.collection, /6.*10/);
+  assert.match(views.collection, /0.*8/);
+  assert.match(views.collection, /Pastry/);
+  assert.match(views.collection, /Bite-sized/);
+  assert.doesNotMatch(views.collection,/23 \/ 50 collected|Bakery/);
+  assert.equal((views.collection.match(/treat-tile collected/g)||[]).length,6);
+  assert.equal((views.collection.match(/treat-tile locked/g)||[]).length,16);
   assert.match(views.leaderboard, /Golden League/);
   assert.match(views.challenges, /Groceries challenge/);
   assert.match(views.deals, /Search brands or deals/);
@@ -107,7 +126,8 @@ try {
   const app = await readFile(path.join(root,'src/App.tsx'),'utf8');
   assert.equal((app.match(/setWheelOpen\(true\)/g)||[]).length,1);
   assert.doesNotMatch(app,/openWheel/);
-  assert.match(css,/full-map[^}]*height:852px/);
+  assert.match(css,/map-content[^}]*height:852px/);
+  assert.match(views.map,/map-extension/);
   assert.match(css,/deals-carousel[^}]*overflow-x:auto/);
   assert.match(css,/map-category-scroll/);
   console.log(`All thirteen screens, wheel, rating and navigation render; shared transactions, bill and navigation callbacks, zero transfer state, receipt details, initial hidden merchant sheet, five logos, ${assets.size} extracted assets and first-load-only wheel verified.`);
